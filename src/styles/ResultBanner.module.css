@@ -1,0 +1,167 @@
+/* ─────────────────────────────────────────────────────────────
+   지도 위에 뜨는 "중간지점 결과" 알림 카드
+   ───────────────────────────────────────────────────────────── */
+.wrap {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(430px, calc(100% - 32px));
+  pointer-events: none; /* 지도 조작을 막지 않도록 — 카드/버튼만 클릭 받음 */
+}
+
+.resultBanner {
+  pointer-events: auto;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--primary-tint-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  overflow: hidden;
+  animation: dropIn 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* 상단 코랄 강조선 */
+.resultBanner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), #ff8a63);
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.resultClose {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-subtle);
+  display: flex;
+  padding: 3px;
+  border-radius: var(--r-sm);
+  transition: color var(--t-fast), background-color var(--t-fast);
+}
+.resultClose:hover {
+  color: var(--text);
+  background: var(--gray-100);
+}
+
+.resultTop {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-right: 24px;
+}
+.resultStar {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, #ffe08a, #ffc24b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  box-shadow: 0 6px 16px rgba(255, 178, 40, 0.4);
+}
+.resultLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.02em;
+}
+.resultName {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+.resultStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.resultStat {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 5px 11px;
+}
+
+.resultCta {
+  border: none;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  box-shadow: var(--shadow-primary);
+  transition: background-color var(--t-fast), transform var(--t-fast);
+}
+.resultCta:hover {
+  background: var(--primary-hover);
+}
+.resultCta:active {
+  transform: scale(0.98);
+}
+
+/* 계산 중 배너 (결과 나오기 전) */
+.calcBanner {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-md);
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  animation: dropIn 0.3s ease;
+}
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2.5px solid var(--primary-tint-2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

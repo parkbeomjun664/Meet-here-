@@ -1,0 +1,115 @@
+/* ─────────────────────────────────────────────────────────────
+   전역 디자인 시스템: 토큰(색·간격·모서리·그림자·타이포) + 리셋
+   - 모든 색/간격/모서리/그림자를 여기 CSS 변수로 정의하고,
+     각 CSS 모듈과 인라인 스타일은 var(--토큰) 으로만 참조한다.
+   - 디자인을 바꾸려면 이 파일 한 곳만 수정하면 전체가 함께 바뀐다.
+   - main.tsx에서 딱 한 번 import.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── 브랜드 (코랄) ── */
+  --primary: #ff5a5f;
+  --primary-hover: #f0474d;
+  --primary-active: #d93a40;
+  --primary-tint: #fff1f2;   /* 아주 옅은 배경 */
+  --primary-tint-2: #ffe0e2; /* 옅은 경계 */
+  --on-primary: #ffffff;
+
+  /* ── 중립 회색 스케일 ── */
+  --gray-50: #f8fafc;
+  --gray-100: #f2f4f7;
+  --gray-200: #e8ebf0;
+  --gray-300: #d7dce3;
+  --gray-400: #a4abb8;
+  --gray-500: #6b7482;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+
+  /* ── 텍스트 (진하기 단계 · 순수 검정 대신 부드러운 회색) ── */
+  --text-strong: var(--gray-800); /* 제목/강조 */
+  --text: var(--gray-700);        /* 본문 기본 */
+  --text-muted: var(--gray-500);  /* 보조 설명 */
+  --text-subtle: var(--gray-400); /* 가장 옅은 안내 */
+
+  /* ── 표면/경계 ── */
+  --bg: #f4f6f9;              /* 앱 캔버스 (사이드바 콘텐츠 배경) */
+  --surface: #ffffff;        /* 카드/패널 */
+  --surface-muted: var(--gray-50);
+  --border: #e8ebf0;
+  --border-strong: #dce0e6;
+
+  /* ── 이동수단 색 (경로 탭 등) ── */
+  --transit: #4361ee;
+  --car: #2e9e5b;
+  --walk: #e8730a;
+
+  /* ── 모서리 반경 ── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* ── 그림자 (부드럽고 층이 있는) ── */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 16px 36px rgba(16, 24, 40, 0.14);
+  --shadow-primary: 0 6px 18px rgba(255, 90, 95, 0.28);
+
+  /* ── 전환 ── */
+  --t-fast: 0.15s ease;
+  --t: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 기본 리셋 */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic',
+    -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* 스크롤바 (얇고 은은하게) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--r-pill);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

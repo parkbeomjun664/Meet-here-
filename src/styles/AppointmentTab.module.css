@@ -1,0 +1,290 @@
+/* ─────────────────────────────────────────────────────────────
+   약속잡기(AppointmentTab) 전용 스타일 · 디자인 토큰(var) 사용
+   ───────────────────────────────────────────────────────────── */
+
+/* ─── 등록된 멤버 카드 ─── */
+.userCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.userCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--surface);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+}
+.avatarWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(135deg, var(--primary), #ff8a63);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-primary);
+}
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+.userInfo .userName {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-strong);
+}
+.userInfo .userDeparture {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.removeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-subtle);
+  padding: 6px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  transition: color var(--t-fast), background-color var(--t-fast);
+}
+.removeButton:hover {
+  color: var(--primary);
+  background-color: var(--primary-tint);
+}
+
+/* ─── 탭 루트: 기능 패널들을 세로로 쌓고 일정 간격 ─── */
+.tabRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── 기능 패널 (제목 헤더 + 본문 = 기능 단위로 명확히 구분) ─── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.panelIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  background: var(--primary-tint);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.panelTitleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.panelTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+.panelHint {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.panelBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 헤더 우측 상태 배지 */
+.countPill {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-tint);
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+.checkPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--car);
+  background: #eaf7ee;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+
+/* 등록된 멤버 블록 (참여자 패널 안) */
+.memberBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  margin-top: 2px;
+  border-top: 1px dashed var(--border);
+}
+.memberBlockLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ─── 입력 ─── */
+.inputWrapper {
+  position: relative;
+}
+.inputField {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  box-sizing: border-box;
+  font-size: 14px;
+  color: var(--text-strong);
+  background: var(--surface);
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.inputField::placeholder {
+  color: var(--text-subtle);
+}
+.inputField:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint-2);
+}
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ─── 버튼 ─── */
+.locationButton {
+  background-color: var(--surface);
+  color: var(--primary);
+  border: 1px dashed var(--primary-tint-2);
+  padding: 11px;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color var(--t-fast), border-color var(--t-fast);
+}
+.locationButton:hover:not(:disabled) {
+  background-color: var(--primary-tint);
+  border-color: var(--primary);
+}
+.locationButton:disabled {
+  color: var(--text-subtle);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+.registerButton {
+  background-color: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  padding: 12px;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color var(--t-fast), color var(--t-fast);
+}
+.registerButton:hover {
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+
+/* ─── 약속 시간 미리보기 ─── */
+.datePreview {
+  background-color: var(--primary-tint);
+  border: 1px solid var(--primary-tint-2);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── 메인 액션 (스크롤해도 하단에 항상 보이도록 sticky) ─── */
+.ctaBar {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0 4px;
+  margin-top: -4px;
+  background: linear-gradient(to top, var(--bg) 70%, rgba(244, 246, 249, 0));
+  z-index: 5;
+}
+.findCenterButton {
+  background: linear-gradient(135deg, var(--primary), #ff7a5f);
+  color: var(--on-primary);
+  border: none;
+  padding: 15px;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-size: 15px;
+  box-shadow: var(--shadow-primary);
+  transition: transform var(--t-fast), box-shadow var(--t-fast),
+    filter var(--t-fast);
+}
+.findCenterButton:hover:not(:disabled) {
+  filter: brightness(1.03);
+  box-shadow: var(--shadow-lg);
+}
+.findCenterButton:active:not(:disabled) {
+  transform: scale(0.985);
+}
+.findCenterButton:disabled {
+  background: var(--gray-200);
+  color: var(--text-subtle);
+  box-shadow: none;
+  cursor: not-allowed;
+}
