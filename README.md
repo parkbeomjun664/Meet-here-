@@ -2,6 +2,18 @@
 
 > 친구들의 출발지를 입력하면 **모두에게 가장 공평한 중간지점**을 찾아주고, 그 주변 맛집·놀거리까지 한 번에 보여주는 약속 장소 추천 웹앱
 
+<p align="center">
+  <a href="https://meet-here-kr.vercel.app/"><b>🔗 Live Demo — meet-here-kr.vercel.app</b></a>
+</p>
+
+<p align="center">
+  <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" />
+  <img alt="Zustand" src="https://img.shields.io/badge/Zustand-2E2E2E" />
+  <img alt="Kakao Maps" src="https://img.shields.io/badge/Kakao%20Maps-FFCD00?logo=kakao&logoColor=black" />
+</p>
+
 여러 명이 만날 때 "어디서 볼까?"는 늘 애매합니다. 이 서비스는 각자의 출발지·이동수단을 받아 **이동시간의 공평성 + 평균 소요시간 + 교통비**를 함께 계산해, 가장 합리적인 만남 지점을 지도 위에 제안합니다.
 
 <p align="center">
@@ -51,6 +63,8 @@
 ---
 
 ## 🚀 실행 방법
+
+> 배포판은 [meet-here-kr.vercel.app](https://meet-here-kr.vercel.app/) 에서 바로 사용할 수 있습니다.
 
 ```bash
 # 1) 의존성 설치
