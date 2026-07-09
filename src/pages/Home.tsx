@@ -146,8 +146,8 @@ const Home = () => {
           toastVisible={toastVisible}
         >
           {/*
-            && 대신 display: none/block으로 숨김 처리
-            → 탭 이동 시 언마운트되지 않아 로컬 state(달력, 시간 등) 유지됨: 컴포넌트를 메모리에서 삭제하지 않고 눈속임으로만 유지
+            조건부 렌더링(&&) 대신 display 토글로 숨긴다.
+            탭을 이동해도 언마운트되지 않아 각 탭의 로컬 상태(달력·시간 등)가 유지된다.
           */}
           <div
             style={{ display: activeTab === 'appointment' ? 'block' : 'none' }}
@@ -159,7 +159,7 @@ const Home = () => {
             />
           </div>
           <div style={{ display: activeTab === 'routes' ? 'block' : 'none' }}>
-            <RouteTab onShowToast={showToast} />
+            <RouteTab />
           </div>
           <div style={{ display: activeTab === 'places' ? 'block' : 'none' }}>
             <PlaceTab
@@ -169,7 +169,7 @@ const Home = () => {
             />
           </div>
           <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
-            <ProfileTab onShowToast={showToast} />
+            <ProfileTab />
           </div>
         </Sidebar>
 

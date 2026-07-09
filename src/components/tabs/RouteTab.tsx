@@ -1,10 +1,6 @@
 import useUserStore from '../../store/userStore';
 import styles from '../../styles/Sidebar.module.css';
 
-interface TabProps {
-  onShowToast: (msg: string) => void;
-}
-
 // 이동수단별 표시 정보
 const MODE_INFO = {
   transit: { label: '대중교통', icon: '🚇', color: '#3949AB', bg: '#EEF2FF', border: '#9FA8DA' },
@@ -15,7 +11,7 @@ const MODE_INFO = {
 // 멤버별 경로 선 색상 (지도와 동일한 색상 사용)
 const ROUTE_COLORS = ['#FF5A5F', '#4A90D9', '#2ECC71', '#F39C12', '#9B59B6'];
 
-const RouteTab = (_props: TabProps) => {
+const RouteTab = () => {
   const { users, midpointResult, isCalculating } = useUserStore();
 
   return (

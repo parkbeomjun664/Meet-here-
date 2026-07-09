@@ -1,3 +1,9 @@
+/*
+ * 카카오 지도 SDK는 공식 TypeScript 타입을 제공하지 않는다.
+ * SDK 인스턴스를 담는 ref에 한해 any를 허용하고,
+ * 외부에는 KakaoMapHandle 인터페이스로 타입 안전성을 보장한다.
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   useEffect,
   useRef,
@@ -217,7 +223,6 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
       },
 
       // 모든 참여자 마커 + 중간지점이 한 화면에 들어오도록 지도 범위를 맞춤
-      // 📌 LatLngBounds: 여러 좌표를 감싸는 최소 사각 범위. setBounds로 그 범위에 맞춰 자동 축소.
       fitToMarkers: () => {
         if (!mapInstanceRef.current || !window.kakao?.maps) return;
         const bounds = new window.kakao.maps.LatLngBounds();
@@ -369,7 +374,7 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
       script.onerror = () => {
         setMapError('카카오 지도 SDK를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
       };
-    }, [KAKAO_APP_KEY, initMap]);
+    }, [initMap]); // KAKAO_APP_KEY는 모듈 상수라 의존성 대상이 아님
 
     // 지도가 렌더링될 빈 div (width/height 100%로 부모 크기에 맞춤)
     return (

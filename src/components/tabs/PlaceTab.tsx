@@ -52,7 +52,6 @@ const PlaceTab = ({ onShowToast, mapRef, isActive }: TabProps) => {
     (async () => {
       setLoading(true);
       try {
-        
         const res = await fetch(
           `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=${category}` +
             `&x=${midpointResult.lng}&y=${midpointResult.lat}` +

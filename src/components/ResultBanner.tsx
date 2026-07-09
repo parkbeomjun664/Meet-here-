@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import useUserStore from '../store/userStore';
 import styles from '../styles/ResultBanner.module.css';
@@ -7,12 +7,14 @@ import styles from '../styles/ResultBanner.module.css';
 // 전역 스토어의 midpointResult / isCalculating을 직접 구독한다.
 const ResultBanner = ({ onViewRoutes }: { onViewRoutes: () => void }) => {
   const { midpointResult, isCalculating } = useUserStore();
-  const [hidden, setHidden] = useState(false);
 
-  // 새 결과가 나올 때마다 다시 보이도록 (닫아뒀어도 재계산하면 재등장)
-  useEffect(() => {
-    if (midpointResult) setHidden(false);
-  }, [midpointResult]);
+  // "닫기"는 특정 결과에 대해서만 유효하도록 결과 키를 저장한다.
+  // 새 결과가 나오면 키가 달라져 배너가 자동으로 다시 보인다. (effect 불필요)
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const resultKey = midpointResult
+    ? `${midpointResult.name}:${midpointResult.lat},${midpointResult.lng}`
+    : null;
+  const hidden = resultKey !== null && dismissedKey === resultKey;
 
   // 계산 중: 진행 표시
   if (isCalculating) {
@@ -34,7 +36,7 @@ const ResultBanner = ({ onViewRoutes }: { onViewRoutes: () => void }) => {
       <div className={styles.resultBanner}>
         <button
           className={styles.resultClose}
-          onClick={() => setHidden(true)}
+          onClick={() => setDismissedKey(resultKey)}
           aria-label="결과 닫기"
         >
           <X size={16} />

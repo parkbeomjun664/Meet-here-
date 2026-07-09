@@ -2,11 +2,6 @@ import { Users } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import styles from '../../styles/Sidebar.module.css';
 
-interface TabProps {
-  onShowToast: (msg: string) => void;
-}
-
-// 이동수단 아이콘 (Record<string,string>로 두어 별도 타입 import 없이 안전하게 인덱싱)
 const TRANSPORT_ICON: Record<string, string> = {
   transit: '🚇',
   car: '🚗',
@@ -14,8 +9,8 @@ const TRANSPORT_ICON: Record<string, string> = {
 };
 
 // 실제 스토어 데이터(참여자·약속시간·중간지점)만으로 구성한 "내 약속 현황".
-// 계정/이력 기능이 없으므로 근거 없는 가짜 지표(만족도 등)는 두지 않는다.
-const ProfileTab = (_props: TabProps) => {
+// 계정/이력 기능이 없으므로 근거 없는 지표(만족도 등)는 두지 않는다.
+const ProfileTab = () => {
   const { users, appointmentDateTime, midpointResult } = useUserStore();
 
   return (

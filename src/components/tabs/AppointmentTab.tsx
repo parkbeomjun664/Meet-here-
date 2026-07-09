@@ -53,8 +53,6 @@ const UserCard = ({
   user: UserEntry;
   onRemove: () => void;
 }) => {
-  // Array.find(): 조건에 맞는 첫 번째 요소 반환, 없으면 undefined
-  // ?? (nullish coalescing): 앞이 null/undefined일 때만 뒤 값 사용 (|| 와 다르게 0이나 '' 는 통과)
   const modeIcon =
     TRANSPORT_OPTIONS.find((t) => t.value === user.transportMode)?.icon ?? '🚇';
   return (
@@ -79,33 +77,26 @@ const UserCard = ({
 
 // ── 메인 컴포넌트 ────────────────────────────────────────────
 const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
-  // 📌 공부 포인트: useState
-  // [현재값, 값변경함수] = useState(초기값)
-  // 값이 바뀌면 컴포넌트가 자동으로 리렌더링됨
+  // 참여자 입력 폼 상태
   const [name, setName] = useState('');
   const [departure, setDeparture] = useState('');
   const [isLocating, setIsLocating] = useState(false);
-  const [suggestions, setSuggestions] = useState<PlaceResult[]>([]); // 제네릭: 배열 안에 PlaceResult 타입만 들어올 수 있음
+  const [suggestions, setSuggestions] = useState<PlaceResult[]>([]);
   const [selectedCoords, setSelectedCoords] = useState<{
-    // 유니온 타입: 좌표 객체 또는 null
     lat: number;
     lng: number;
   } | null>(null);
   const [transportMode, setTransportMode] = useState<TransportMode>('transit');
   const [isRecommending, setIsRecommending] = useState(false);
-  // (참고) 초기화 모달은 사이드바(Sidebar)에서 담당하므로 여기서는 상태를 두지 않음
 
-  // 날짜/시간 관련 상태
-  const now = new Date(); // Date 객체: 현재 시각
+  // 날짜/시간 선택 상태 (초기화 모달은 Sidebar가 담당)
+  const now = new Date();
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(now.getMonth()); // getMonth(): 0~11 반환 (0=1월)
-  const [currentYear, setCurrentYear] = useState(now.getFullYear()); // getFullYear(): 4자리 연도
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth()); // 0~11
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [timeValue, setTimeValue] = useState('');
 
-  // 📌 공부 포인트: 커스텀 훅 (useUserStore)
-  // Context에서 필요한 값만 구조분해 할당으로 꺼내씀
-  // 전역 상태를 한 곳에서 관리하고 어느 컴포넌트에서나 접근 가능
   const {
     users,
     addUser,
@@ -134,32 +125,25 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
   ];
   const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
 
-  // 해당 월의 마지막 날 계산
-  // 📌 공부 포인트: new Date(year, month+1, 0)
-  // month+1의 0번째 날 = 해당 월의 마지막 날 (JS Date의 날짜 0은 이전 달 마지막 날을 의미)
+  // 다음 달 0일 = 이번 달 마지막 날
   const getDaysInMonth = (y: number, m: number) =>
     new Date(y, m + 1, 0).getDate();
 
-  // 해당 월 1일이 무슨 요일인지 (0=일, 1=월 ... 6=토)
+  // 해당 월 1일의 요일 (0=일 ~ 6=토) — 달력 첫 주 빈칸 계산용
   const getFirstDay = (y: number, m: number) => new Date(y, m, 1).getDay();
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDay(currentYear, currentMonth);
 
-  // 오늘 이전 날짜 비활성화 판별
-  // 📌 공부 포인트: setHours(0,0,0,0)으로 시간을 00:00:00으로 맞춰야
-  // 날짜만 정확히 비교 가능 (시간 차이로 인한 오판 방지)
+  // 지난 날짜는 선택 불가. 시각을 0시로 맞춰 날짜 단위로만 비교한다.
   const isDateDisabled = (day: number) => {
     const t = new Date(currentYear, currentMonth, day);
     t.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return t < today; // 오늘보다 이전이면 true
+    return t < today;
   };
 
-  // 현재 표시 중인 달력의 날짜가 선택된 날짜와 같은지 확인
-  // 📌 공부 포인트: 옵셔널 체이닝 ?.
-  // selectedDate가 null이면 undefined 반환 (에러 안 남)
   const isSelectedDay = (day: number) =>
     selectedDate?.getFullYear() === currentYear &&
     selectedDate?.getMonth() === currentMonth &&
@@ -170,13 +154,10 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
     now.getMonth() === currentMonth &&
     now.getDate() === day;
 
-  // 📌 공부 포인트: setState에 함수 전달 (함수형 업데이트)
-  // setCurrentMonth(m => m - 1) 처럼 이전 값을 받아서 계산할 때 사용
-  // setCurrentMonth(currentMonth - 1) 대신 쓰면 비동기 상태 업데이트 시 안전함
   const prevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
-      setCurrentYear((y) => y - 1); // 함수형 업데이트
+      setCurrentYear((y) => y - 1);
     } else setCurrentMonth((m) => m - 1);
   };
   const nextMonth = () => {
@@ -191,10 +172,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
     setCalendarOpen(false);
   };
 
-  // 날짜 + 시간 문자열 조합 → 전역 저장
-  // 📌 공부 포인트: split(':').map(Number)
-  // "09:30" → ['09','30'] → [9, 30] 으로 변환
-  // map(Number)는 map(s => Number(s))의 축약형
+  // 선택한 날짜 + "HH:mm" 시간을 합쳐 전역 상태에 저장
   const handleConfirmDateTime = () => {
     if (!selectedDate || !timeValue) return;
     const [hour, minute] = timeValue.split(':').map(Number);
@@ -205,8 +183,6 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       hour,
       minute
     );
-    // 📌 toLocaleString: 날짜를 사람이 읽기 좋은 문자열로 변환
-    // 'ko-KR' 로케일 → "2025년 6월 1일 오후 03:00" 형식
     setAppointmentDateTime(
       result.toLocaleString('ko-KR', {
         year: 'numeric',
@@ -225,28 +201,20 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       } ${selectedDate.getDate()}일`
     : '날짜 선택';
 
-  // 📌 공부 포인트: 파생 상태 (derived state)
-  // 별도 useState 없이 기존 상태에서 계산해서 쓰는 값
-  // 리렌더링 시 자동으로 재계산됨
   const canConfirm = selectedDate !== null && timeValue !== '';
 
-  // 📌 공부 포인트: async/await + 동적 import
-  // import()는 필요한 시점에 모듈을 불러오는 코드 스플리팅 기법
-  // 앱 초기 로딩 속도를 높이기 위해 무거운 로직을 지연 로딩할 때 사용
+  // 출발지 기준 최적 이동수단 추천.
+  // midpoint 모듈은 무거우므로 버튼 클릭 시점에 동적 import (초기 번들 분리)
   const handleRecommendTransport = async () => {
     if (!selectedCoords) {
       onShowToast?.('먼저 출발지를 선택해주세요.');
       return;
     }
-    setIsRecommending(true); // 로딩 시작
+    setIsRecommending(true);
     try {
-      // 동적 import: 버튼 클릭 시점에 모듈 로드
       const { recommendTransport } = await import('../../lib/midpoint');
 
-      // 📌 공부 포인트: Array.reduce()
-      // 배열을 순회하며 누적값을 만드는 함수
-      // (누적값, 현재요소) => 새 누적값 형태
-      // 여기선 lat의 합계를 구한 뒤 멤버 수로 나눠 평균 계산
+      // 기준점: 멤버가 있으면 좌표 평균, 없으면 본인 출발지
       const center =
         users.length > 0
           ? {
@@ -261,34 +229,24 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
         center.lng
       );
 
-      setTransportMode(rec.mode); // 추천 결과를 이동수단 선택에 바로 반영
+      setTransportMode(rec.mode);
       onShowToast?.(`✨ 추천: ${rec.reason}`);
     } catch {
       onShowToast?.('추천 계산에 실패했어요.');
     } finally {
-      // 📌 공부 포인트: finally
-      // try/catch 결과와 무관하게 항상 실행됨
-      // 로딩 상태 해제처럼 "반드시 실행해야 하는 코드"에 사용
       setIsRecommending(false);
     }
   };
 
-  // 카카오 REST API 키워드 검색
-  // 📌 공부 포인트: fetch API
-  // 브라우저 내장 HTTP 요청 함수
-  // headers: 서버에 추가 정보 전달 (여기선 인증 키)
-  // Authorization 헤더: API 키 인증 방식 중 하나
+  // 카카오 로컬 키워드 검색 (출발지 자동완성)
   const searchPlaces = async (keyword: string) => {
     setDeparture(keyword);
     if (!keyword.trim()) {
-      // trim(): 앞뒤 공백 제거 후 빈 문자열 체크
       setSuggestions([]);
       return;
     }
     try {
       const res = await fetch(
-        // encodeURIComponent: URL에 한글/특수문자 포함 시 인코딩 필수
-        // "강남역" → "%EA%B0%95%EB%82%A8%EC%97%AD"
         `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(
           keyword
         )}&size=5`,
@@ -298,31 +256,24 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
           },
         }
       );
-      const data = await res.json(); // 응답을 JSON으로 파싱
-      setSuggestions(data.documents ?? []); // data.documents가 없으면 빈 배열
+      const data = await res.json();
+      setSuggestions(data.documents ?? []);
     } catch {
-      setSuggestions([]); // 네트워크 오류 등 예외 시 목록 초기화
+      setSuggestions([]); // 네트워크 오류 시 목록만 비우고 조용히 실패
     }
   };
 
-  // 자동완성 목록에서 장소 선택
+  // 자동완성 목록에서 장소 선택 (카카오는 좌표를 문자열로 반환)
   const handleSelectPlace = (place: PlaceResult) => {
     setDeparture(place.place_name);
     setSuggestions([]);
-    // 📌 공부 포인트: parseFloat
-    // 문자열 → 부동소수점 숫자 변환 ("126.978" → 126.978)
-    // 카카오 API는 좌표를 문자열로 반환하기 때문에 변환 필요
-    const lat = parseFloat(place.y); // y = 위도(latitude)
-    const lng = parseFloat(place.x); // x = 경도(longitude)
+    const lat = parseFloat(place.y);
+    const lng = parseFloat(place.x);
     setSelectedCoords({ lat, lng });
-    mapRef?.current?.moveToPlace(lat, lng); // ref를 통해 자식 컴포넌트 메서드 직접 호출
+    mapRef?.current?.moveToPlace(lat, lng);
   };
 
-  // GPS 현재 위치 감지
-  // 📌 공부 포인트: Geolocation API
-  // 브라우저 내장 위치 감지 기능
-  // getCurrentPosition(성공콜백, 실패콜백)
-  // 비동기로 동작 → 사용자가 권한 허용/거부할 때까지 대기
+  // 브라우저 Geolocation → 역지오코딩으로 주소 변환
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       onShowToast?.('위치 기능을 지원하지 않아요.');
@@ -331,24 +282,21 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        // 성공 콜백: GeolocationPosition 객체 전달
-        const { latitude: lat, longitude: lng } = pos.coords; // 구조분해 + 이름 변경
+        const { latitude: lat, longitude: lng } = pos.coords;
         try {
-          // Nominatim: 무료 역지오코딩 API (좌표 → 주소)
+          // Nominatim(무료 역지오코딩)으로 좌표 → 주소 변환
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`
           );
           const data = await res.json();
-          // 📌 공부 포인트: 단축 평가 (Short-circuit evaluation)
-          // || 연산자: 앞이 falsy면 다음 값 시도
-          // 주소 정밀도 높은 것부터 순서대로 시도하는 폴백 패턴
+          // 정밀도가 높은 필드부터 순서대로 폴백, 최후엔 좌표 문자열
           const addr =
-            data.address?.quarter || // 동 단위
-            data.address?.suburb || // 근교
-            data.address?.neighbourhood || // 주거지
-            data.address?.city_district || // 구 단위
-            data.display_name?.split(',')[0] || // 전체 주소 첫 번째 항목
-            `${lat.toFixed(4)}, ${lng.toFixed(4)}`; // 최후 수단: 좌표 문자열
+            data.address?.quarter ||
+            data.address?.suburb ||
+            data.address?.neighbourhood ||
+            data.address?.city_district ||
+            data.display_name?.split(',')[0] ||
+            `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
           setDeparture(addr);
           setSelectedCoords({ lat, lng });
           mapRef?.current?.moveToPlace(lat, lng);
@@ -360,18 +308,14 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
         }
       },
       () => {
-        // 실패 콜백: 권한 거부 등
         onShowToast?.('위치 권한을 허용해주세요.');
         setIsLocating(false);
       }
     );
   };
 
-  // 참여자 등록
+  // 참여자 등록 (이름·출발지·좌표가 모두 확정된 경우에만)
   const handleRegister = () => {
-    // 📌 공부 포인트: 얼리 리턴 (Early Return) 패턴
-    // 조건 불만족 시 함수 초반에 return으로 탈출
-    // 중첩 if 줄이고 가독성 높이는 패턴
     if (!name.trim() || !departure.trim()) {
       onShowToast?.('이름과 출발지를 모두 입력해주세요!');
       return;
@@ -385,7 +329,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       departure: departure.trim(),
       lat: selectedCoords.lat,
       lng: selectedCoords.lng,
-      transportMode, // 현재 선택된 이동수단 함께 저장
+      transportMode,
     });
     mapRef?.current?.addMarker(
       selectedCoords.lat,
@@ -401,10 +345,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
     setTransportMode('transit');
   };
 
-  // 중간 지점 계산
-  // 📌 공부 포인트: 동적 import + async/await 조합
-  // findMidpoint는 무거운 연산이라 버튼 클릭 시점에만 로드
-  // try/catch/finally로 로딩·성공·실패 상태를 명확히 처리
+  // 중간지점 계산 (무거운 모듈이라 클릭 시점에 동적 import)
   const handleFindMidpoint = async () => {
     if (users.length < 2) return;
     setCalculating(true);
@@ -413,22 +354,20 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
     try {
       const { findMidpoint } = await import('../../lib/midpoint');
       const result = await findMidpoint(users);
-      setMidpoint(result); // 결과를 전역 스토어에 저장 → RouteTab에서 읽음
+      setMidpoint(result); // 전역 저장 → RouteTab·ResultBanner가 구독
       mapRef?.current?.addMidpointMarker(result.lat, result.lng, result.name);
-      // 📌 공부 포인트: Array.forEach
-      // 배열 순회, 반환값 없음 (map과 달리 새 배열 안 만듦)
-      // 부수효과(side effect)만 수행할 때 사용
       result.routes.forEach((route, idx) => {
         if (route.polyline?.length) {
-          mapRef?.current?.drawRoute(route.polyline, idx); // 멤버별 경로 선 그리기
+          mapRef?.current?.drawRoute(route.polyline, idx);
         }
       });
       // 모든 참여자 이름과 중간지점이 한눈에 보이도록 지도 축소
       mapRef?.current?.fitToMarkers();
       onShowToast?.(`중간 지점: ${result.name} 찾았어요! 🎉`);
-    } catch (e: any) {
-      // e: any → 에러 객체 타입을 any로 명시 (TS에서 catch 변수는 unknown 타입)
-      onShowToast?.(e.message ?? '중간 지점 계산에 실패했어요.');
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : '중간 지점 계산에 실패했어요.';
+      onShowToast?.(message);
       setCalculating(false);
     }
   };
@@ -466,10 +405,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
           <User size={16} color="#999" className={styles.inputIcon} />
         </div>
 
-        {/* 출발지 입력 + 자동완성 드롭다운
-            📌 공부 포인트: position: relative + absolute 조합
-            부모에 relative, 자식(드롭다운)에 absolute 주면
-            부모 기준으로 위치 잡기 가능 */}
+        {/* 출발지 입력 + 자동완성 드롭다운 (드롭다운을 absolute로 띄우기 위해 relative) */}
         <div className={styles.inputWrapper} style={{ position: 'relative' }}>
           <input
             type="text"
@@ -503,10 +439,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
               {suggestions.map((place, i) => (
                 <li
                   key={i}
-                  // 📌 공부 포인트: onMouseDown vs onClick
-                  // onClick은 mousedown → mouseup → click 순서
-                  // input의 onBlur(포커스 해제)가 mousedown 직후 발생해서
-                  // onClick 시점엔 드롭다운이 이미 사라짐 → onMouseDown 사용
+                  // onClick은 input의 blur로 드롭다운이 먼저 닫혀 발화하지 않으므로 onMouseDown 사용
                   onMouseDown={() => handleSelectPlace(place)}
                   style={{
                     padding: '10px 12px',
@@ -544,9 +477,6 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
             이동수단 선택
           </div>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            {/* 📌 공부 포인트: 배열.map()으로 반복 UI 생성
-                TRANSPORT_OPTIONS 배열을 순회하며 버튼 3개 자동 생성
-                직접 3개 버튼을 하드코딩하는 것보다 유지보수 용이 */}
             {TRANSPORT_OPTIONS.map(({ value, label, icon }) => (
               <button
                 key={value}
@@ -573,14 +503,11 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
               </button>
             ))}
 
-            {/* 추천 버튼
-                📌 공부 포인트: disabled 조건
-                isRecommending(로딩중) 이거나 selectedCoords(출발지)가 없으면 비활성화
-                || 연산자: 둘 중 하나라도 true면 disabled */}
+            {/* 이동수단 추천 (출발지가 정해져야 계산 가능) */}
             <button
               onClick={handleRecommendTransport}
               disabled={isRecommending || !selectedCoords}
-              title="출발지 기준 최적 이동수단 추천" // 마우스 호버 시 툴팁
+              title="출발지 기준 최적 이동수단 추천"
               style={{
                 padding: '7px 10px',
                 borderRadius: '8px',
@@ -629,10 +556,6 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
                   현재 모인 멤버 · {users.length}명
                 </div>
                 <div className={styles.userCardList}>
-            {/* 📌 공부 포인트: key prop
-                React가 리스트 아이템을 효율적으로 업데이트하기 위해 필요
-                고유한 값이어야 함 (index 사용 비권장 → id 사용 권장)
-                key가 바뀌면 컴포넌트를 새로 마운트함 */}
             {users.map((user) => (
               <UserCard
                 key={user.id}
