@@ -8,6 +8,7 @@ import PlaceTab from '../components/tabs/PlaceTab';
 import ProfileTab from '../components/tabs/ProfileTab';
 import ResultBanner from '../components/ResultBanner';
 import useUserStore from '../store/userStore';
+import styles from '../styles/Home.module.css';
 
 const HEADER_HEIGHT = '75px';
 
@@ -67,15 +68,7 @@ const Home = () => {
   };
  
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'hidden',
-      }}
-    >
+    <div className={styles.appShell}>
       {/* ── 고정 헤더 (앱바) · 브랜드 중앙 정렬 ── */}
       <header
         style={{
@@ -137,7 +130,7 @@ const Home = () => {
       </header>
 
       {/* ── 헤더 아래 콘텐츠 영역 ── */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div className={styles.appBody}>
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -173,8 +166,8 @@ const Home = () => {
           </div>
         </Sidebar>
 
-        {/* ── 오른쪽 지도 영역 (결과 배너를 지도 위에 겹쳐 표시) ── */}
-        <div style={{ flex: 1, height: '100%', position: 'relative' }}>
+        {/* ── 지도 영역 (결과 배너를 지도 위에 겹쳐 표시) ── */}
+        <div className={styles.mapPane}>
           <KakaoMap
             ref={kakaoMapRef}
             center={{ lat: 37.5665, lng: 126.978 }}

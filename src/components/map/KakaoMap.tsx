@@ -43,6 +43,10 @@ export interface KakaoMapHandle {
 
 const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY?.trim(); // 카카오 JavaScript 앱 키
 
+// setBounds 여백(px). 화면이 좁으면 여백을 줄여야 마커가 다 들어온다.
+const boundsPadding = (): [number, number, number, number] =>
+  window.innerWidth <= 768 ? [44, 28, 28, 28] : [90, 70, 70, 70];
+
 const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
   ({ center = { lat: 37.5665, lng: 126.978 }, level = 7, onReady }, ref) => {
     const mapRef = useRef<HTMLDivElement>(null); // 지도가 렌더링될 DOM 요소
@@ -236,8 +240,9 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
           count++;
         }
         if (count === 0) return;
-        // 상·우·하·좌 여백(px): 이름 라벨이 화면 가장자리에 잘리지 않도록 넉넉히
-        mapInstanceRef.current.setBounds(bounds, 90, 70, 70, 70);
+        // 상·우·하·좌 여백(px): 이름 라벨이 화면 가장자리에 잘리지 않도록
+        const [t, r, b, l] = boundsPadding();
+        mapInstanceRef.current.setBounds(bounds, t, r, b, l);
       },
 
       // 검색 반경 원 + 주변 인프라 마커를 지도에 표시하고, 반경이 다 보이도록 맞춤
@@ -276,12 +281,13 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
         });
 
         // 3) 반경 원 전체가 보이도록 지도 범위 맞춤
+        const [pt, pr, pb, pl] = boundsPadding();
         mapInstanceRef.current.setBounds(
           radiusCircleRef.current.getBounds(),
-          40,
-          40,
-          40,
-          40
+          pt,
+          pr,
+          pb,
+          pl
         );
       },
 
@@ -375,6 +381,18 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
         setMapError('카카오 지도 SDK를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.');
       };
     }, [initMap]); // KAKAO_APP_KEY는 모듈 상수라 의존성 대상이 아님
+
+    // 컨테이너 크기가 바뀌면 카카오 지도에 relayout()을 알려야 한다.
+    // (모바일 화면 회전, 주소창 노출/숨김, 레이아웃 전환 시 지도가 잘리거나 회색으로 남는 문제 방지)
+    useEffect(() => {
+      const el = mapRef.current;
+      if (!el || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(() => {
+        mapInstanceRef.current?.relayout();
+      });
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, []);
 
     // 지도가 렌더링될 빈 div (width/height 100%로 부모 크기에 맞춤)
     return (

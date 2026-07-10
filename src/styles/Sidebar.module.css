@@ -41,6 +41,39 @@
   pointer-events: none;
 }
 
+/* ── 모바일: 사이드바를 화면 아래쪽 전체 폭 패널로 ── */
+@media (max-width: 768px) {
+  /* 본문 높이의 56%를 조작 패널이, 나머지를 지도가 차지.
+     min-height:0 이 없으면 flex 아이템 기본값(min-height:auto) 때문에
+     콘텐츠 높이 아래로 줄어들지 않아 지도가 0px가 된다. */
+  .sidebarWrapper,
+  .sidebarCollapsed {
+    width: 100%;
+    height: auto;
+    flex: 0 0 56%;
+    min-height: 0;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    box-shadow: 0 -6px 16px rgba(16, 24, 40, 0.08);
+  }
+  /* 모바일에선 접기 기능을 쓰지 않는다 (지도/패널이 항상 함께 보임) */
+  .collapseToggleBtn {
+    display: none;
+  }
+  .sidebarCollapsed .sidebar {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .tabContentArea {
+    padding: 16px 14px 10px 14px;
+  }
+}
+
 /* ── 토글 버튼 ── */
 .collapseToggleBtn {
   position: absolute;
@@ -73,6 +106,7 @@
 /* 내부 독립 스크롤 컨테이너 (앱 캔버스 배경 위에 카드가 떠 보이도록) */
 .tabContentArea {
   flex: 1;
+  min-height: 0; /* flex 컬럼 안에서 내부 스크롤이 동작하도록 */
   padding: 20px 18px 14px 18px;
   overflow-y: auto;
   background: var(--bg);
@@ -280,10 +314,13 @@
   transition: border-color var(--t-fast), box-shadow var(--t-fast),
     transform var(--t-fast);
 }
-.placeItemCard:hover {
-  border-color: var(--primary-tint-2);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
+/* 마우스가 있는 기기에서만 hover 효과 (터치 기기에서 눌린 상태로 고착되는 것 방지) */
+@media (hover: hover) {
+  .placeItemCard:hover {
+    border-color: var(--primary-tint-2);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
 }
 .placeItemCardActive {
   border-color: var(--primary);
@@ -577,10 +614,12 @@
   transition: border-color var(--t-fast), box-shadow var(--t-fast),
     transform var(--t-fast);
 }
-.bookmarkItem:hover {
-  border-color: var(--primary-tint-2);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .bookmarkItem:hover {
+    border-color: var(--primary-tint-2);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
 }
 .bookmarkItem span {
   font-size: 13px;
