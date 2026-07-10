@@ -3,8 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type TransportMode = 'transit' | 'car' | 'walk';
 
+// 참여자 식별자. 동명이인이 있어도 구분되도록 이름이 아닌 고유 id를 쓴다.
+// (crypto.randomUUID는 보안 컨텍스트에서만 제공되므로 폴백을 둔다)
+const createUserId = (): string =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
 export interface UserEntry {
-  id: number;
+  id: string;
   name: string;
   departure: string;
   lat: number;
@@ -38,8 +45,8 @@ interface UserStore {
   isCalculating: boolean;
 
   // ── 액션 ──
-  addUser: (payload: Omit<UserEntry, 'id'>) => void; // id는 스토어에서 생성
-  removeUser: (id: number) => void;
+  addUser: (payload: Omit<UserEntry, 'id'>) => string; // 생성된 id를 반환 (지도 마커 키로 사용)
+  removeUser: (id: string) => void;
   clearUsers: () => void;
   setAppointmentDateTime: (value: string) => void;
   clearAppointmentDateTime: () => void;
@@ -60,10 +67,11 @@ const useUserStore = create<UserStore>()(
       isCalculating: false,
 
       // ── 액션 ──
-      addUser: (payload) =>
-        set((state) => ({
-          users: [...state.users, { id: Date.now(), ...payload }],
-        })),
+      addUser: (payload) => {
+        const id = createUserId();
+        set((state) => ({ users: [...state.users, { id, ...payload }] }));
+        return id; // 호출부가 이 id로 지도 마커를 등록한다
+      },
 
       removeUser: (id) =>
         set((state) => ({
@@ -86,7 +94,7 @@ const useUserStore = create<UserStore>()(
     }),
     {
       name: 'meet-here-store', // localStorage 키 이름
-      version: 1, // 저장 형식 버전 (필드가 바뀌면 올려서 옛 데이터 정리)
+      version: 2, // 저장 형식 버전 (필드가 바뀌면 올려서 옛 데이터 정리)
       storage: createJSONStorage(() => localStorage),
       // 저장할 항목만 선택 (isCalculating 같은 일시적 상태는 제외)
       partialize: (state) => ({
@@ -94,13 +102,21 @@ const useUserStore = create<UserStore>()(
         appointmentDateTime: state.appointmentDateTime,
         midpointResult: state.midpointResult,
       }),
-      // 옛 버전(totalFare/avgTime 없던 midpointResult) 데이터는 결과만 비워 크래시 방지
+      // 옛 저장 데이터를 현재 형식으로 보정한다.
+      //  v0 → v1: midpointResult에 totalFare/avgTime이 없어 렌더 중 크래시하던 문제
+      //  v1 → v2: 참여자 id가 number → string(UUID)으로 변경
       migrate: (persisted) => {
         const state = persisted as Partial<UserStore>;
+
         const mp = state?.midpointResult as Partial<MidpointResult> | null;
         if (mp && (mp.totalFare === undefined || mp.avgTime === undefined)) {
           state.midpointResult = null;
         }
+
+        if (Array.isArray(state?.users)) {
+          state.users = state.users.map((u) => ({ ...u, id: String(u.id) }));
+        }
+
         return state as UserStore;
       },
     }

@@ -324,7 +324,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       onShowToast?.('목록에서 장소를 선택하거나 현재 위치를 감지해주세요!');
       return;
     }
-    addUser({
+    const id = addUser({
       name: name.trim(),
       departure: departure.trim(),
       lat: selectedCoords.lat,
@@ -332,6 +332,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       transportMode,
     });
     mapRef?.current?.addMarker(
+      id,
       selectedCoords.lat,
       selectedCoords.lng,
       name.trim()
@@ -562,7 +563,7 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
                 user={user}
                 onRemove={() => {
                   removeUser(user.id);
-                  mapRef?.current?.removeMarker(user.name);
+                  mapRef?.current?.removeMarker(user.id);
                 }}
               />
             ))}

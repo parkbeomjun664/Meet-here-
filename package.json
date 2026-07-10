@@ -1,7 +1,7 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "meet-here",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,8 +13,6 @@
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-kakao-maps-sdk": "^1.2.1",
-    "styled-components": "^6.4.1",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
@@ -30,5 +28,6 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"
-  }
+  },
+  "description": "모두에게 가장 공평한 중간지점을 찾아주는 약속 장소 추천 웹앱"
 }

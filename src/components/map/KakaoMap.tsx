@@ -23,8 +23,9 @@ interface KakaoMapProps {
 // 부모 컴포넌트에서 ref로 호출할 수 있는 메서드 타입
 export interface KakaoMapHandle {
   moveToPlace: (lat: number, lng: number) => void;
-  addMarker: (lat: number, lng: number, name: string) => void;
-  removeMarker: (name: string) => void;
+  // id를 키로 쓴다 (동명이인이어도 마커가 서로 덮어쓰이지 않도록)
+  addMarker: (id: string, lat: number, lng: number, label: string) => void;
+  removeMarker: (id: string) => void;
   addMidpointMarker: (lat: number, lng: number, name: string) => void; // 중간지점 전용 마커
   removeMidpointMarker: () => void;
   drawRoute: (polyline: [number, number][], colorIndex: number) => void; // 경로 선 그리기
@@ -46,6 +47,20 @@ const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY?.trim(); // 카카오 J
 // setBounds 여백(px). 화면이 좁으면 여백을 줄여야 마커가 다 들어온다.
 const boundsPadding = (): [number, number, number, number] =>
   window.innerWidth <= 768 ? [44, 28, 28, 28] : [90, 70, 70, 70];
+
+// 커스텀 오버레이는 HTML 문자열을 받으므로, 사용자 입력(이름)은 반드시 이스케이프한다.
+const escapeHtml = (value: string): string =>
+  value.replace(
+    /[&<>"']/g,
+    (ch) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[ch] as string
+  );
 
 const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
   ({ center = { lat: 37.5665, lng: 126.978 }, level = 7, onReady }, ref) => {
@@ -130,10 +145,11 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
         }
       },
 
-      // 참여자 등록 시 이름 라벨이 달린 마커 추가
-      addMarker: (lat, lng, name) => {
+      // 참여자 등록 시 이름 라벨이 달린 마커 추가 (키는 id)
+      addMarker: (id, lat, lng, label) => {
         if (!mapInstanceRef.current) return;
         const position = new window.kakao.maps.LatLng(lat, lng);
+        const name = escapeHtml(label);
 
         // 이름 라벨 커스텀 오버레이 HTML
         const content = `
@@ -171,9 +187,9 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
           </div>
         `;
 
-        // 기존에 같은 이름 마커가 있으면 제거 후 재생성
-        if (userMarkersRef.current.has(name)) {
-          userMarkersRef.current.get(name).setMap(null);
+        // 같은 id의 마커가 있으면 제거 후 재생성
+        if (userMarkersRef.current.has(id)) {
+          userMarkersRef.current.get(id).setMap(null);
         }
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -182,7 +198,7 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
           yAnchor: 1, // 오버레이 하단이 좌표에 맞춰짐
         });
         overlay.setMap(mapInstanceRef.current);
-        userMarkersRef.current.set(name, overlay); // 이름을 key로 마커 저장
+        userMarkersRef.current.set(id, overlay);
 
         // 미리보기 마커 제거 (참여자 마커로 대체됐으므로)
         if (previewMarkerRef.current) {
@@ -192,12 +208,11 @@ const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(
 
         mapInstanceRef.current.setCenter(position); // 지도 중심을 참여자 위치로 이동
       },
-      // 멤버별 경로를 지도에 선으로 그리기
       // 참여자 삭제 시 해당 마커 제거
-      removeMarker: (name) => {
-        if (userMarkersRef.current.has(name)) {
-          userMarkersRef.current.get(name).setMap(null); // 지도에서 마커 숨김
-          userMarkersRef.current.delete(name); // Map에서 참조 제거
+      removeMarker: (id) => {
+        if (userMarkersRef.current.has(id)) {
+          userMarkersRef.current.get(id).setMap(null);
+          userMarkersRef.current.delete(id);
         }
       },
 

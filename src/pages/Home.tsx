@@ -53,7 +53,7 @@ const Home = () => {
     const map = kakaoMapRef.current;
     if (!map) return;
     map.clearAll();
-    users.forEach((u) => map.addMarker(u.lat, u.lng, u.name));
+    users.forEach((u) => map.addMarker(u.id, u.lat, u.lng, u.name));
     if (midpointResult) {
       map.addMidpointMarker(
         midpointResult.lat,
@@ -63,8 +63,9 @@ const Home = () => {
       midpointResult.routes.forEach((r, idx) => {
         if (r.polyline?.length) map.drawRoute(r.polyline, idx);
       });
-      map.fitToMarkers();
     }
+    // addMarker가 매번 지도 중심을 옮기므로, 복원 후 전체가 보이도록 맞춘다
+    if (users.length > 0) map.fitToMarkers();
   };
  
   return (

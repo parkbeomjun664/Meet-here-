@@ -322,11 +322,6 @@
     transform: translateY(-2px);
   }
 }
-.placeItemCardActive {
-  border-color: var(--primary);
-  background: var(--primary-tint);
-  box-shadow: var(--shadow-sm);
-}
 .placeHeader {
   display: flex;
   justify-content: space-between;
@@ -341,11 +336,6 @@
   border-radius: var(--r-sm);
   font-weight: 600;
 }
-.placeScore {
-  font-size: 12px;
-  color: #f5a623;
-  font-weight: 700;
-}
 .placeName {
   font-size: 14.5px;
   font-weight: 700;
@@ -357,66 +347,6 @@
   color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
-}
-.placeDetailCard {
-  background: var(--primary-tint);
-  border: 1px solid var(--primary-tint-2);
-  border-radius: var(--r-lg);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.placeDetailHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-}
-.placeDetailBadge {
-  display: inline-flex;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--primary);
-  background: var(--surface);
-  padding: 3px 9px;
-  border-radius: var(--r-pill);
-  margin-bottom: 6px;
-  box-shadow: var(--shadow-xs);
-}
-.placeDetailTitle {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-strong);
-}
-.placeDetailScore {
-  font-size: 12px;
-  color: #f5a623;
-  font-weight: 700;
-}
-.placeDetailDesc {
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--text-muted);
-}
-.placeTagList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.placeTag {
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--text-muted);
-  border: 1px solid var(--primary-tint-2);
-}
-.placeMetaRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--text-muted);
 }
 
 /* ─── 최적 경로 상태 카드 ─── */
