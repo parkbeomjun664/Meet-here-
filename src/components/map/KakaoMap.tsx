@@ -1,7 +1,26 @@
-/*
- * 카카오 지도 SDK는 공식 TypeScript 타입을 제공하지 않는다.
- * SDK 인스턴스를 담는 ref에 한해 any를 허용하고,
- * 외부에는 KakaoMapHandle 인터페이스로 타입 안전성을 보장한다.
+/**
+ * KakaoMap.tsx — 카카오 지도 컴포넌트 (명령형 SDK ↔ 선언형 React의 다리)
+ *
+ * 이 프로젝트에서 가장 까다로운 부분.
+ * 카카오 지도는 React가 아니라 "직접 명령해야 하는" 외부 라이브러리다.
+ *   - React(선언형): 상태가 이러면 화면은 알아서 이렇게 된다
+ *   - 지도(명령형):  마커를 찍어라 / 지워라 / 확대해라
+ *
+ * 그래서 상태로 그리지 않고, forwardRef + useImperativeHandle로
+ * 부모(Home)에게 "리모컨"만 넘겨준다.
+ *
+ *   Home ──ref──> KakaoMapHandle { addMarker, drawRoute, fitToMarkers, ... }
+ *
+ * 지도 인스턴스와 마커들은 전부 이 파일 안(ref)에 숨겨두고,
+ * 외부는 KakaoMapHandle에 정의된 메서드만 호출할 수 있다. (캡슐화)
+ *
+ * 마커를 state가 아닌 useRef에 보관하는 이유:
+ *   마커 목록이 바뀌어도 React가 화면을 다시 그릴 필요가 없기 때문.
+ *   (지도는 SDK가 직접 그린다 → 리렌더 유발은 낭비)
+ *
+ * 카카오 SDK는 공식 TypeScript 타입을 제공하지 않으므로,
+ * SDK 인스턴스를 담는 ref에 한해 any를 허용하고
+ * 외부에는 KakaoMapHandle로 타입 안전성을 보장한다.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {

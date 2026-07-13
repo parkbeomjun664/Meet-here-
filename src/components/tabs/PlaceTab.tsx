@@ -1,3 +1,19 @@
+/**
+ * PlaceTab.tsx — 3번 탭 "맛집/놀거리" (중간지점 주변 인프라 검색)
+ *
+ * 중간지점을 중심으로 카카오 로컬 카테고리 검색을 호출한다.
+ *   - 카테고리 칩: 맛집(FD6) / 카페(CE7) / 놀거리(CT1) / 명소(AT4)
+ *   - 반경 칩: 500m / 1km / 2km / 3km
+ *
+ * useEffect가 두 개 있고, 각각 역할이 다르다:
+ *   1) 검색 effect — 탭이 보이거나 카테고리·반경이 바뀌면 API 재호출
+ *      cancelled 플래그로 "경쟁 상태(race condition)"를 막는다.
+ *      (반경을 빠르게 연타하면 이전 응답이 늦게 도착해 최신 결과를 덮어쓸 수 있음)
+ *   2) 지도 effect — 결과를 지도에 반경 원 + 마커로 표시하고,
+ *      다른 탭으로 가면 지워서 경로선과 뒤섞이지 않게 한다.
+ *
+ * 카카오 로컬 API는 평점을 제공하지 않아, 거리·카테고리·상세링크로 대체했다.
+ */
 import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import useUserStore from '../../store/userStore';

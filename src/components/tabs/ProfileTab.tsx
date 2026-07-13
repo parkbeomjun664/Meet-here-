@@ -1,3 +1,15 @@
+/**
+ * ProfileTab.tsx — 4번 탭 "사용자" (내 약속 현황)
+ *
+ * 계정·로그인 기능이 없으므로, 스토어의 실제 데이터만으로 현황을 보여준다.
+ *   - 요약: 몇 명이 모이는 약속인지 + 약속 시간
+ *   - 지표: 참여자 수 / 시간편차 / 평균 이동시간
+ *   - 목록: 참여자별 출발지·이동수단, 추천 중간지점
+ *
+ * 설계 원칙: 없는 데이터를 있는 척하지 않는다.
+ *   초기에는 "만족도 97%" 같은 가짜 지표가 있었으나,
+ *   근거가 없는 수치라 전부 제거했다.
+ */
 import { Users } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 import styles from '../../styles/Sidebar.module.css';

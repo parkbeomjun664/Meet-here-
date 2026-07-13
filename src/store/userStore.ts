@@ -1,3 +1,20 @@
+/**
+ * userStore.ts — 전역 상태 저장소 (Zustand)
+ *
+ * 이 앱의 "심장". 컴포넌트끼리 직접 대화하지 않고 모두 이 창고를 거친다.
+ *
+ *   [쓰기] AppointmentTab  → addUser / setMidpoint / setAppointmentDateTime
+ *   [읽기] RouteTab · ResultBanner · ProfileTab · PlaceTab (구독 → 값 바뀌면 자동 리렌더)
+ *
+ * 보관하는 것:
+ *   - users               참여자 목록
+ *   - appointmentDateTime 약속 시간
+ *   - midpointResult      중간지점 계산 결과
+ *   - isCalculating       계산 중 여부(일시적 상태 → 저장 안 함)
+ *
+ * persist 미들웨어로 localStorage에 자동 저장/복원하며,
+ * 저장 형식이 바뀌면 version + migrate로 옛 데이터를 보정한다.
+ */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 

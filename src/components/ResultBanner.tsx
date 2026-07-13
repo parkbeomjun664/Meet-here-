@@ -1,10 +1,21 @@
+/**
+ * ResultBanner.tsx — 지도 위에 떠서 계산 결과를 알리는 카드
+ *
+ * 이 앱의 "상징". 중간지점이 나오면 지도 위에 크게 띄운다.
+ * (장소명 · 시간편차 · 평균 이동시간 · 총 교통비 + 경로 보기 버튼)
+ *
+ * 특징: 부모에게서 props로 결과를 받지 않는다.
+ *       스토어의 midpointResult를 "직접 구독"하므로,
+ *       어느 탭에 있든 계산이 끝나면 자동으로 나타난다.
+ *
+ * "닫기"는 useEffect 없이 파생 상태로 구현했다.
+ *   닫은 결과의 키를 저장해두고, 새 결과가 나오면 키가 달라져 자동으로 다시 보인다.
+ *   (effect 안에서 setState를 호출하면 불필요한 연쇄 렌더가 발생한다)
+ */
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import useUserStore from '../store/userStore';
 import styles from '../styles/ResultBanner.module.css';
-
-// 지도 위에 떠서 "산출된 중간지점 + 핵심 정보"를 크게 보여주는 알림 카드.
-// 전역 스토어의 midpointResult / isCalculating을 직접 구독한다.
 const ResultBanner = ({ onViewRoutes }: { onViewRoutes: () => void }) => {
   const { midpointResult, isCalculating } = useUserStore();
 

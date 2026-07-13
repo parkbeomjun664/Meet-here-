@@ -1,3 +1,16 @@
+/**
+ * RouteTab.tsx — 2번 탭 "최적경로"
+ *
+ * 계산된 결과를 "보여주기만" 하는 탭. props를 하나도 받지 않는다.
+ * 스토어의 midpointResult를 직접 구독하므로, 계산이 끝나면 알아서 갱신된다.
+ *
+ * 보여주는 것:
+ *   - 추천 지점 요약 (시간편차 · 평균시간 · 총 교통비)
+ *   - 멤버별 경로 카드 (소요시간 · 이동수단 · 요금 · 환승 횟수)
+ *   - 비용 산출 근거 (예: "톨비 2,400원 + 기름값 3,400원")
+ *
+ * 화면 상태 3가지: 참여자 없음 / 계산 중 / 결과 표시
+ */
 import useUserStore from '../../store/userStore';
 import styles from '../../styles/Sidebar.module.css';
 

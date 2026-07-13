@@ -1,3 +1,22 @@
+/**
+ * Home.tsx — 화면 전체를 조립하는 레이아웃 페이지
+ *
+ * 구성:
+ *   ┌────────────────────────────┐
+ *   │ 헤더 (브랜드)               │
+ *   ├──────────┬─────────────────┤
+ *   │ Sidebar  │ KakaoMap        │  ← 데스크톱: 가로 분할
+ *   │ (탭 4개) │  + ResultBanner │     모바일: 지도 위 / 사이드바 아래
+ *   └──────────┴─────────────────┘
+ *
+ * 이 파일이 맡는 두 가지 책임:
+ *  1) 지도 제어 — kakaoMapRef로 KakaoMap의 메서드를 호출한다.
+ *     (지도는 명령형 외부 SDK라 전역 상태만으로는 그릴 수 없다)
+ *  2) 전체 초기화 — handleReset이 스토어 + 지도 + 입력 폼을 한 번에 비운다.
+ *
+ * 새로고침 시에는 onReady → redrawFromStore로
+ * localStorage에서 복원된 데이터를 지도에 다시 그린다.
+ */
 import { useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import KakaoMap, { type KakaoMapHandle } from '../components/map/KakaoMap';
