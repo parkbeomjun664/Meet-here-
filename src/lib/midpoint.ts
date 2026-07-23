@@ -43,6 +43,7 @@ type RouteResult = {
   polyline: [number, number][]; // 지도에 그릴 경로 좌표
   distance?: number; // 이동 거리(km) — 자동차/도보에서 채움
   fareNote?: string; // 비용이 어떻게 산출됐는지 설명 (UI 표시용)
+  warning?: string; // 결과를 신뢰하기 어려운 경우의 안내 (예: 도서 지역)
 };
 
 // ── 거리 계산 (Haversine) ─────────────────────────────────────
@@ -174,6 +175,32 @@ const findCandidates = async (
   }
 
   return [];
+};
+
+// ── 도서 지역 판별 ────────────────────────────────────────────
+//
+// 카카오 길찾기는 섬 좌표도 육지 도로에 끌어붙여 "길찾기 성공"을 반환한다.
+// (대청도→강화 요청이 253km 도로 경로로 나온다) 그래서 경로 실패 여부로는
+// 섬을 구분할 수 없고, 좌표의 행정구역을 직접 조회해 판별한다.
+//
+// 육로가 연결되지 않은 시·군만 나열한다. 다리로 이어진 강화군·영종도 등은
+// 제외한다. (옹진군 내 영흥도는 다리가 있어 오탐이 될 수 있는 한계가 있다)
+const ISLAND_REGIONS = ['옹진군', '울릉군', '제주특별자치도'];
+
+const isIslandRegion = async (lng: number, lat: number): Promise<boolean> => {
+  try {
+    const res = await fetch(
+      `https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lng}&y=${lat}`,
+      { headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` } }
+    );
+    const data = await res.json();
+    const region = data.documents?.[0];
+    if (!region) return false;
+    const name = `${region.region_1depth_name} ${region.region_2depth_name}`;
+    return ISLAND_REGIONS.some((r) => name.includes(r));
+  } catch {
+    return false; // 판별 실패 시엔 경고를 띄우지 않는다 (오탐 방지)
+  }
 };
 
 // ── 이동수단별 경로 계산 ──────────────────────────────────────
@@ -333,6 +360,10 @@ const estimateIntercityTransit = async (
         [oLat, oLng],
         [dLat, dLng],
       ];
+
+  // 출발지가 도서 지역이면 아래 KTX 기준 추정이 성립하지 않는다(실제로는 여객선).
+  const island = await isIslandRegion(oLng, oLat);
+
   const km = Math.round(dist);
   // KTX 표정속도 근사(직선거리 기준 약 120km/h) + 접근·대기 40분
   const totalTime = Math.round((dist / 120) * 60 + 40);
@@ -345,7 +376,12 @@ const estimateIntercityTransit = async (
     mode: 'transit' as TransportMode,
     distance: km,
     polyline,
-    fareNote: `KTX·고속버스 예상 (약 ${km}km · 접근·대기 포함)`,
+    fareNote: island
+      ? `직선거리 ${km}km 기준 추정 (육로 연결 없음)`
+      : `KTX·고속버스 예상 (약 ${km}km · 접근·대기 포함)`,
+    warning: island
+      ? '도서 지역이라 실제로는 여객선을 이용해야 해요. 여객선 운항 정보를 제공하는 API가 없어, 표시된 시간·비용은 실제와 크게 다를 수 있습니다.'
+      : undefined,
   };
 };
 
@@ -589,6 +625,7 @@ export const findMidpoint = async (
           mode: route.mode,
           polyline: route.polyline,
           fareNote: route.fareNote,
+          warning: route.warning,
         };
       })
     );

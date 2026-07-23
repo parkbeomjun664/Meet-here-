@@ -48,6 +48,7 @@ export interface MidpointResult {
     mode: TransportMode;
     polyline?: [number, number][]; // 지도에 그릴 경로 좌표 [위도, 경도][]
     fareNote?: string; // 비용 산출 근거 (예: 톨비 + 기름값)
+    warning?: string; // 결과 신뢰도 안내 (예: 도서 지역 — 여객선 미반영)
   }[];
   maxTimeDiff: number; // 멤버 간 이동시간 편차(분) — 공평성 지표
   totalFare: number;   // 모든 멤버의 교통비 합계(원) — 비용 지표

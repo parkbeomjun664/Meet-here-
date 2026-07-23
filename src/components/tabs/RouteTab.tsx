@@ -126,6 +126,13 @@ const RouteTab = () => {
                         💡 비용 산출: {route.fareNote}
                       </div>
                     )}
+
+                    {/* 결과를 신뢰하기 어려운 구간 안내 (예: 도서 지역) */}
+                    {route.warning && (
+                      <div className={styles.routeWarning}>
+                        ⚠️ {route.warning}
+                      </div>
+                    )}
                   </div>
                 );
               })}
