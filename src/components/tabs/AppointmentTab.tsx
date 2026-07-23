@@ -374,6 +374,9 @@ const AppointmentTab = ({ onShowToast, mapRef }: UserProps) => {
       const { findMidpoint } = await import('../../lib/midpoint');
       const result = await findMidpoint(users);
       setMidpoint(result); // 전역 저장 → RouteTab·ResultBanner가 구독
+      // 이전 계산의 경로선을 먼저 지운다.
+      // (지우지 않으면 재계산할 때마다 옛 경로가 지도에 계속 쌓인다)
+      mapRef?.current?.clearRoutes();
       mapRef?.current?.addMidpointMarker(result.lat, result.lng, result.name);
       result.routes.forEach((route, idx) => {
         if (route.polyline?.length) {
