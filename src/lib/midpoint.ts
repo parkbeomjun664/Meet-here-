@@ -69,6 +69,11 @@ const calcCenter = (users: UserEntry[]) => ({
   lng: users.reduce((s, u) => s + u.lng, 0) / users.length,
 });
 
+// 카카오 로컬 API가 허용하는 radius 상한(m).
+// 이 값을 넘겨 요청하면 ValidationError로 "요청 자체가 거부"된다.
+// (예전에 50000을 넘겨 장거리 검색이 전부 실패하고 있었다)
+const KAKAO_MAX_RADIUS = 20000;
+
 // ── 후보 지점 검색 (거리에 따라 전략 변경) ──────────────────────
 const fetchNearbyCandidates = async (
   lat: number,
@@ -79,14 +84,15 @@ const fetchNearbyCandidates = async (
   // 50km 초과: KTX/고속터미널 우선 검색
   // 10~50km: 반경 넓혀서 지하철역 검색
   // 10km 이하: 일반 지하철역 검색
+  // (radius는 아래에서 KAKAO_MAX_RADIUS로 잘라 보낸다)
 
   const strategies =
     distanceKm > 50
       ? [
-          { query: 'KTX역', radius: 50000 },
-          { query: '고속버스터미널', radius: 50000 },
-          { query: '시외버스터미널', radius: 50000 },
-          { query: '지하철역', radius: 30000 },
+          { query: 'KTX역', radius: KAKAO_MAX_RADIUS },
+          { query: '고속버스터미널', radius: KAKAO_MAX_RADIUS },
+          { query: '시외버스터미널', radius: KAKAO_MAX_RADIUS },
+          { query: '지하철역', radius: KAKAO_MAX_RADIUS },
         ]
       : distanceKm > 10
       ? [
@@ -101,19 +107,25 @@ const fetchNearbyCandidates = async (
   const results: { place_name: string; x: string; y: string }[] = [];
 
   for (const { query, radius } of strategies) {
+    // 상한을 넘는 radius는 요청이 통째로 거부되므로 반드시 잘라서 보낸다
+    const safeRadius = Math.min(radius, KAKAO_MAX_RADIUS);
     try {
       const res = await fetch(
         `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(
           query
-        )}&x=${lng}&y=${lat}&radius=${radius}&size=5&sort=distance`,
+        )}&x=${lng}&y=${lat}&radius=${safeRadius}&size=5&sort=distance`,
         { headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` } }
       );
       const data = await res.json();
-      if (data.documents?.length) {
+      // 카카오는 실패해도 200이 아닌 응답 + errorType을 준다. 조용히 넘기면
+      // "후보 0개"의 원인을 알 수 없으므로 개발 중에는 남긴다.
+      if (data.errorType) {
+        console.warn(`[midpoint] 후보 검색 실패 (${query}):`, data.message);
+      } else if (data.documents?.length) {
         results.push(...data.documents);
       }
-    } catch {
-      /* 개별 검색 실패는 무시 */
+    } catch (e) {
+      console.warn(`[midpoint] 후보 검색 요청 오류 (${query}):`, e);
     }
   }
 
@@ -126,6 +138,42 @@ const fetchNearbyCandidates = async (
       return true;
     })
     .slice(0, 8); // 최대 8개 후보
+};
+
+// ── 후보 탐색 (중심점이 비어 있으면 멤버 쪽으로 물러나며 재시도) ────
+//
+// 기하학적 중심점은 "사람이 갈 수 있는 곳"이라는 보장이 없다.
+// 예) 대청도 ↔ 서울역의 중심점은 황해 한가운데라 주변에 아무것도 없다.
+//
+// 그래서 중심점에서 후보를 못 찾으면, 중심 → 각 멤버 방향으로
+// 조금씩 이동하며(t=0.5, 0.75) 다시 찾고, 그래도 없으면 멤버의
+// 출발지 자체를 후보로 삼는다. 바다 좌표를 그대로 내놓지 않기 위함이다.
+const findCandidates = async (
+  center: { lat: number; lng: number },
+  users: UserEntry[],
+  maxDist: number
+) => {
+  // 1) 중심점 주변 (정상적인 경우 여기서 끝난다)
+  const atCenter = await fetchNearbyCandidates(center.lat, center.lng, maxDist);
+  if (atCenter.length) return atCenter;
+
+  // 2) 중심 → 멤버 방향으로 이동하며 재탐색
+  for (const t of [0.5, 0.75]) {
+    for (const u of users) {
+      const lat = center.lat + (u.lat - center.lat) * t;
+      const lng = center.lng + (u.lng - center.lng) * t;
+      const found = await fetchNearbyCandidates(lat, lng, maxDist);
+      if (found.length) return found;
+    }
+  }
+
+  // 3) 멤버 출발지 자체에서 탐색
+  for (const u of users) {
+    const found = await fetchNearbyCandidates(u.lat, u.lng, maxDist);
+    if (found.length) return found;
+  }
+
+  return [];
 };
 
 // ── 이동수단별 경로 계산 ──────────────────────────────────────
@@ -501,18 +549,22 @@ export const findMidpoint = async (
     }
   }
 
-  const candidates = await fetchNearbyCandidates(
-    center.lat,
-    center.lng,
-    maxDist
-  );
+  const candidates = await findCandidates(center, users, maxDist);
 
-  // 후보가 없어도 중심점 자체를 후보로 추가 (어떤 상황에서도 결과 보장)
+  // 그래도 후보가 없으면(모든 검색 실패 등) 결과는 보장해야 한다.
+  // 이때 중심점 좌표를 쓰면 바다 한가운데가 나올 수 있으므로,
+  // 중심에서 가장 가까운 "멤버의 출발지"를 대신 사용한다.
   if (!candidates.length) {
+    const nearest = users.reduce((best, u) =>
+      calcDistance(center.lat, center.lng, u.lat, u.lng) <
+      calcDistance(center.lat, center.lng, best.lat, best.lng)
+        ? u
+        : best
+    );
     candidates.push({
-      place_name: '중간 지점',
-      x: String(center.lng),
-      y: String(center.lat),
+      place_name: nearest.departure || '중간 지점',
+      x: String(nearest.lng),
+      y: String(nearest.lat),
     });
   }
 
